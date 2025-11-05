@@ -69,7 +69,7 @@ https://helm.sh/docs/intro/install/#from-script
 
 用户基于 kubeconfig 通过命令行方式使用K8S，需要先在自己的终端设备配置好 kubeconfig。利用系统提供的 kubeconfig 信息（包含用户账户和 Token 等信息），可以在自己的终端利用 kubectl 对 K8S 集群中的资源进行访问。本节介绍如何获取和使用 kubeconfig。
 
-用浏览器访问URL地址：https://login.xa.xshixun.com:7443，会进入Login界面：
+用浏览器访问URL地址：https://login.xa.xshixun.com:7443 ，会进入Login界面：
 
 ![](assets/dex_login.png)
 
@@ -152,21 +152,21 @@ kubectl exec -i name_of_the_pod -- bash
 
 在默认的模板中，自动为每个pod默认挂载了三个存储卷。这些存储卷是管理员为用户创建好了用于长期保存数据的[持久卷申领（PersistentVolumeClaim，PVC）](https://kubernetes.io/zh-cn/docs/concepts/storage/persistent-volumes/)。
 
-- 挂载于容器内`/root`路径的NFS服务的PVC，用于存储文档及代码等小文件；
-- 挂载于容器内`/gfshome`路径GFS的个人存储空间PVC，用于存储模型文件、数据集等大文件；
-- 挂载于容器内`/ssdshare`路径GFS的共享空间PVC，用于存放和共享开源大模型、开源数据集等公共数据；存储需要快速访问的模型文件等大文件；
+- 挂载于容器内`/root`路径的GPFS存储集群的PVC，用于存储文档及代码等小文件；
+- 挂载于容器内`/share`路径xxxxxxx；
+- 挂载于容器内`/ssdshare`路径xxxxxxx；
 
-临时数据存放在宿主机本地的NVME硬盘中，挂载在容器内的`/scratch1`和`/scratch2`，PVC被删除后里面的数据也会被删除，请一定不要将需要持久化保存的重要数据放在这几个路径。
+临时数据存放在宿主机本地的NVME硬盘中，挂载在容器内的`/scratch`，PVC被删除后里面的数据也会被删除，请一定不要将需要持久化保存的重要数据放在这几个路径。
 
-上面的helm模板中会自动挂载长期存储数据的四个PVC，并自动创建对应于`/scratch1`和`/scratch2`两个临时数据存储PVC。
+上面的helm模板中会自动挂载长期存储数据的四个PVC，并自动创建对应于`/scratch`两个临时数据存储PVC。
 
 
-| 存储系统   | 写入速度 |
+<!-- | 存储系统   | 写入速度 |
 | ---------- | -------- |
 | 宿主机NVME | 2.3GB/s  |
 | GFS        | 1GB/s    |
 | GFS-SSD    | 2GB/s    |
-| NFS        | 1GB/s    |
+| NFS        | 1GB/s    | -->
 
 ### 删除计算任务
 
@@ -246,6 +246,8 @@ helm delete 命令会自动删除容器和应于`/scratch1`至`/scratch4`的四�
 我们可以在集群里从自定义镜像拉起 POD，以支持快速的实验环境配置。自定义镜像的思路是**在`ubuntu-tensorflow`、`ubuntu-pytorch`或`orion-client-2.4.2`的基础上，配置自己的环境**。
 
 ##### 信任集群 Harbor
+
+**无报错可以不执行本操作**
 
 自定义镜像需要从 Harbor 拉取，因此我们需要在 Docker 中添加对集群 Harbor 的信任。在Mac下用 Docker Desktop 可以直接在客户端`Docker Engine`里加入`insecure-registries`项，若未使用 Docker Desktop，则在`/etc/docker/daemon.json`中添加（若该文件不存在则创建）：
 
