@@ -1,0 +1,5 @@
+ts001,ts001@xa.xshixun.com,2001,500
+ts002,ts002@xa.xshixun.com,2002,500
+ts003,ts003@xa.xshixun.com,2003,500
+ts004,ts004@xa.xshixun.com,2004,500
+ts005,ts005@xa.xshixun.com,2005,500

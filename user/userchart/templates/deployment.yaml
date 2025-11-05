@@ -1,0 +1,205 @@
+{{ $randomid := randAlphaNum 8 | lower }}
+{{ $base := .Values.BaseName | default "undescribed-job" }}
+{{ $namespace := .Values.NameSpace | default "default"  }}
+{{ $deploy := .Values.DeployName | default (printf "%s-%s-%s" $namespace $base .Release.Name) }}
+{{ $label := .Values.Label | default (printf "%s-%s" $base .Release.Name) }}
+{{ $containername := .Values.ContainerName | default (printf "%s-%s" $base .Release.Name) }}
+{{ $containerimage := .Values.ContainerImage | default "harbor.ai.iiis.co/xuw/pytorch:v1.5" }}
+{{ $uid := .Values.UID | default "0" }}
+{{ $gid := .Values.GID | default "0" }}
+
+{{- $limits := .Values.Limits | default (dict) }}
+{{ $limitscpu := $limits.CPU | default "8" }}
+{{ $limitsmemory := $limits.memory | default "16Gi" }}
+{{ $limitsgpu := $limits.GPU | default "0" }}
+
+{{ $nvme := .Values.NVMEStorage | default "100Gi" }}
+{{ $noGpfsShare := .Values.NoGPFSSHARE | default false }}
+{{ $extraport := .Values.ExtraPort | default 0 }}
+{{ $ingresshost := .Values.IngressHost | default "" }}
+{{ $use_shm := .Values.UseShm | default false}}
+{{ $shm_size := .Values.ShmSize | default "8Gi" }}
+
+{{ $command := .Values.Command | default "" }}
+{{ $args := .Values.Args | default "" }}
+
+{{ $use_IB := .Values.UseIB | default false}}
+
+{{ $replicas := .Values.Replicas | default 1 }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $deploy }}
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $label }}
+spec:
+  replicas: {{ $replicas }}
+  selector:
+    matchLabels:
+      app: {{ $label }}
+  template:
+    metadata:
+      labels:
+        app: {{ $label }}
+      annotations:
+    # {{ if $use_IB }}
+    #     k8s.v1.cni.cncf.io/networks: ipoibnetwork-{{ .Values.NameSpace }}
+    # {{ end }}
+    spec:
+      hostIPC: false
+      hostPID: false
+      hostNetwork: false
+      securityContext:
+        runAsUser: {{ $uid }}
+        runAsGroup: {{ $gid }}
+      nodeSelector:
+        gpu-model: {{ .Values.GPU }}
+      containers:
+      - name: {{ $containername }}
+        imagePullPolicy: IfNotPresent
+        image: {{ $containerimage }} # 可自行更改镜像和版本
+{{ if $use_IB }}    
+        securityContext:    
+          capabilities:
+            add: [ "IPC_LOCK" ]
+{{ end }}
+{{- if $command }}
+        command: {{ $command }}
+        args: {{ $args }}
+{{- else }}
+        command: ["bash", "-c", "--"]
+        args: ["while true; do sleep 30; done;"]
+{{- end }}
+        resources:
+          limits:
+            cpu: {{ $limitscpu }} # 最大CPU
+            memory: {{ $limitsmemory }} # 最大内存数目
+            nvidia.com/gpu: {{ $limitsgpu }} # 请求的GPU数量
+{{ if $use_IB }}
+            rdma/rdma_ib400: {{ $limitsgpu }}00
+{{ end }}
+          requests:
+{{ if $use_IB }}
+            rdma/rdma_ib400: {{ $limitsgpu }}00
+{{ end }}
+        volumeMounts:
+        - name: gpfshome # 与下面volumes的名字对应
+          mountPath: /root # 本地的挂载点 /root
+        - name: scratch # 与下面volumes的名字对应
+          mountPath: /scratch # 本地的挂载点
+        - name: share # 与下面volumes的名字对应
+          mountPath: /share # 本地的挂载点
+          readOnly: true
+        - name: ssdshare # 与下面volumes的名字对应
+          mountPath: /ssdshare # 本地的挂载点
+          readOnly: true
+{{ if not $noGpfsShare }}
+        - name: gpfsshare # 与下面volumes的名字对应
+          mountPath: /gpfs-share # 本地的挂载点
+          readOnly: true
+{{ end }}
+{{ if $use_shm }}
+        - name: dshm
+          mountPath: /dev/shm
+{{ end }}
+      volumes:
+{{ if $use_shm }}
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ $shm_size }}
+{{ end }}
+      - name: gpfshome
+        persistentVolumeClaim:
+          claimName: pvc-gpfshome-{{ $namespace }}
+      - name: scratch
+        persistentVolumeClaim:
+          claimName: pvc-rancher-localpath-{{ $namespace }}-{{ $deploy }}-{{ $randomid}}
+      - name: share
+        hostPath:
+          path: /mnt/gpfs2/hqzy-mg3226/share # directory location on host
+          type: Directory # this field is optional
+      - name: ssdshare
+        hostPath:
+          path: /mnt/gpfs2/hqzy-mg3226/ssdshare # directory location on host
+          type: Directory # this field is optional
+
+{{ if not $noGpfsShare }}
+      - name: gpfsshare
+        hostPath:
+          path: /mnt/gpfs2/hqzy-mg3226/gpfs-share # directory location on host
+          type: Directory # this field is optional
+{{ end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels: 
+    app: {{ $label }}
+    k8s.kuboard.cn/name: {{ $deploy }}
+  name: {{ $deploy }}
+  namespace: {{ $namespace }}
+spec: 
+  ports:
+    - name: {{ $deploy }}-port
+      port: 22
+      protocol: TCP
+      targetPort: 22
+{{ if $extraport}}
+    - name: {{ $deploy }}-extraport
+      port: {{ $extraport }}
+      protocol: TCP
+      targetPort: {{ $extraport }}
+{{ end }}
+  selector: 
+    app: {{ $label }}
+  sessionAffinity: None
+  type: NodePort
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-rancher-localpath-{{ $namespace }}-{{ $deploy }}-{{ $randomid}}
+  namespace: {{ $namespace }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $nvme }}
+  storageClassName: rancher-local-path
+
+{{ if $ingresshost }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  name: {{ $deploy }}
+  namespace: {{ $namespace }}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ $ingresshost }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ $deploy }}
+                port:
+                  number: {{ $extraport }}
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - {{ $ingresshost }}
+      secretName: passwd-tls
+
+{{ end }}

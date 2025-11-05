@@ -1,0 +1,13 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-gpfshome-{{ .Values.NameSpace }}
+  namespace: {{ .Values.NameSpace }}
+spec:
+  storageClassName: gpfs-csi-dynamic
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500G  # 申请的资源大小
