@@ -155,6 +155,7 @@ kubectl exec -i name_of_the_pod -- bash
 - 挂载于容器内`/root`路径的GPFS存储集群的PVC，用于存储文档及代码等小文件；
 - 挂载于容器内`/share`路径xxxxxxx；
 - 挂载于容器内`/ssdshare`路径xxxxxxx；
+- 挂载于容器内`/gpfs-share`路径xxxxxxx；
 
 临时数据存放在宿主机本地的NVME硬盘中，挂载在容器内的`/scratch`，PVC被删除后里面的数据也会被删除，请一定不要将需要持久化保存的重要数据放在这几个路径。
 
