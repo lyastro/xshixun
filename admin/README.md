@@ -13,7 +13,7 @@
 ![](assets/tree_users_ldap.png)
 
 组织架构的约定如下：
-1. 在根节点（dc=iiis,dc=co）下，创建两个ou（Organisational Unit），名为Groups、People；
+1. 在根节点（dc=xshixun,dc=com）下，创建两个ou（Organisational Unit），名为Groups、People；
 2. Group下必须一个或多个类型为posixGroup的组（如上图中的defaultGroup、student组），用于创建用户账户时填写gid字段；
 3. 组都建在ou=Group节点下；除第2条所述的个别posixGroup外，其他分组使用groupOfUniqueNames类型；
 4. 用户都建在ou=People节点下，类型为User Account对象；必须为用户增加Email字段，并确保该字段取值唯一；
@@ -22,8 +22,8 @@
 
 ### 操作说明
 
-在浏览器上登录LDAP管理界面（phpLDAPAdmin）的URL地址：`https://ldap.ai.iiis.co/`。
-管理员用户名：`cn=admin,dc=iiis,dc=co`
+在浏览器上登录LDAP管理界面（phpLDAPAdmin）的URL地址：`https://ldap.xa.xshixun.com/`。
+管理员用户名：`cn=admin,dc=xshixun,dc=com`
 
 
 登录后，界面如下，用于操作的界面元素分为三部分：*左上操作按钮栏*、*左侧组织架构*、*右侧操作页面*。
@@ -32,7 +32,7 @@
 
 #### 1、创建ou（Groups和People）
 
-1）在*左侧组织架构*上选中根节点（dc=iiis,dc=co），右侧操作页面上选择【Create a child entry】操作：
+1）在*左侧组织架构*上选中根节点（dc=xshixun,dc=com），右侧操作页面上选择【Create a child entry】操作：
 
 ![](assets/phpLDAPadmin_create_child_entry.png)
 

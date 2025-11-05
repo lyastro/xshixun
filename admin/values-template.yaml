@@ -6,7 +6,7 @@
 EMAIL: $EMAIL
 NameSpace: $NAMESPACE   # 自己的namespace （同用户名）
 BaseName: pytorch   # 任务的基本名字，建议写任务描述，例如pytorch
-ContainerImage: harbor.xa.xshixun.com:7443/share/pytorch/pytorch:2.1.1-cuda12.1-cudnn8-runtime-ssh   # 镜像名称，默认为 harbor.ai.iiis.co/xuw/pytorch:v1.1，或者见README的说明
+ContainerImage: harbor.xa.xshixun.com:7443/share/pytorch/pytorch:2.1.1-cuda12.1-cudnn8-runtime-ssh   # 镜像名称，默认为 harbor.xa.xshixun.com:7443/xuw/pytorch:v1.1，或者见README的说明
 GPU: H200 # RTX4090D RTX4090 RTX3090 A100
 
 ########### 选填的部分 ###########
@@ -25,7 +25,7 @@ Limits:             # 申请的资源，注意所有启动的资源总和不能�
 
 ########### 高级配置 ###########
 # ExtraPort: 7860
-# IngressHost: lab2.ai.iiis.co
+# IngressHost: lab2.xa.xshixun.com # 暂时不支持ingress
 # Command: '["python", "/app/app_class1.py"]'
 # Args: ''
 UseIB: true # 是否使用IB，默认不使用，如果使用，需要在启动时指定UseIB=true

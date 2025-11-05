@@ -5,7 +5,7 @@
 ########### 必须要写的部分 ###########
 NameSpace: s0837   # 自己的namespace （同用户名）
 BaseName: pytorch   # 任务的基本名字，建议写任务描述，例如pytorch
-ContainerImage: harbor.xa.xshixun.com:7443/llm-course/lab:v2   # 镜像名称，默认为 harbor.ai.iiis.co/xuw/pytorch:v1.5，或者见README的说明
+ContainerImage: harbor.xa.xshixun.com:7443/llm-course/lab:v2   # 镜像名称，默认为 harbor.xa.xshixun.com:7443/xuw/pytorch:v1.5，或者见README的说明
 GPU: H200 # 目前只有这一个选项
 
 ########### 选填的部分 ###########
@@ -25,7 +25,7 @@ ShmSize: 16Gi
 
 ########### 高级配置 ###########
 # ExtraPort: 7860
-# IngressHost: lab2.ai.iiis.co # 暂时不支持ingress
+# IngressHost: lab2.xa.xshixun.com # 暂时不支持ingress
 # Command: '["python", "/app/app_class1.py"]'
 # Args: ''
 # UseIB: true # 是否使用IB，默认不使用，如果使用，需要在启动时指定UseIB=true
