@@ -150,7 +150,7 @@ kubectl exec -i name_of_the_pod -- bash
 
 ### 默认挂载的存储描述
 
-在默认的模板中，自动为每个pod默认挂载了三个存储卷。这些存储卷是管理员为用户创建好了用于长期保存数据的[持久卷申领（PersistentVolumeClaim，PVC）](https://kubernetes.io/zh-cn/docs/concepts/storage/persistent-volumes/)。
+在默认的模板中，自动为每个pod默认挂载了课程所需的存储卷。这些存储卷是管理员为用户创建好了用于长期保存数据的[持久卷申领（PersistentVolumeClaim，PVC）](https://kubernetes.io/zh-cn/docs/concepts/storage/persistent-volumes/)。
 
 - 挂载于容器内`/root`路径的GPFS存储集群的PVC，用于存储文档及代码等小文件；
 - 挂载于容器内`/share`路径xxxxxxx；
@@ -159,7 +159,7 @@ kubectl exec -i name_of_the_pod -- bash
 
 临时数据存放在宿主机本地的NVME硬盘中，挂载在容器内的`/scratch`，PVC被删除后里面的数据也会被删除，请一定不要将需要持久化保存的重要数据放在这几个路径。
 
-上面的helm模板中会自动挂载长期存储数据的四个PVC，并自动创建对应于`/scratch`两个临时数据存储PVC。
+上面的helm模板中会自动挂载长期存储数据的几个存储路径，并自动创建对应于`/scratch`临时数据存储PVC。
 
 
 <!-- | 存储系统   | 写入速度 |
@@ -182,7 +182,7 @@ helm list
 ```
 来列出所有的release。
 
-helm delete 命令会自动删除容器和应于`/scratch1`至`/scratch4`的四个临时数据存储PVC，但不会删除长期存储数据的三个PVC。
+helm delete 命令会**自动删除容器和应于`/scratch`的临时数据存储PVC及其中数据**，但不会删除长期存储数据的几个挂载路径中的数据。
 
 
 ### 定制自己的模板
