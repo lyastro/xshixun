@@ -25,7 +25,7 @@ ShmSize: 16Gi
 
 ########### 高级配置 ###########
 # ExtraPort: 7860
-# IngressHost: lab2.xa.xshixun.com # 暂时不支持ingress
+# IngressHost: test.xa.xshixun.cn # 注意域名最后是cn不是com
 # Command: '["python", "/app/app_class1.py"]'
 # Args: ''
 # UseIB: true # 是否使用IB，默认不使用，如果使用，需要在启动时指定UseIB=true

@@ -200,6 +200,6 @@ spec:
   tls:
     - hosts:
         - {{ $ingresshost }}
-      secretName: passwd-tls
+      secretName: {{ $ingresshost }}-tls
 
 {{ end }}
