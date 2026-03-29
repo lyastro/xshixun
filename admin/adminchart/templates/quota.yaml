@@ -6,11 +6,11 @@ metadata:
   namespace: {{ .Values.NameSpace }}
 spec:
   hard:
-    limits.cpu: '72'
-    limits.memory: 250Gi
-    requests.cpu: '72'
-    requests.memory: 250Gi
-    requests.nvidia.com/gpu: '1'
-    requests.storage: 2T
-    count/pods: '10'
+    limits.cpu: {{ default "72" .Values.Quota.CPU | quote }}
+    limits.memory: {{ default "250Gi" .Values.Quota.Memory }}
+    requests.cpu: {{ default "72" .Values.Quota.CPU | quote }}
+    requests.memory: {{ default "250Gi" .Values.Quota.Memory }}
+    requests.nvidia.com/gpu: {{ default "1" .Values.Quota.GPU | quote }}
+    requests.storage: {{ default "2T" .Values.Quota.Storage }}
+    count/pods: {{ default "10" .Values.Quota.Pods | quote }}
 

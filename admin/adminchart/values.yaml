@@ -1,9 +1,24 @@
-# Default values for userchart.
+# Default values for adminchart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 EMAIL: test06@test.lthpc.com
 NameSpace: test06
+
+# ---- ResourceQuota (可选覆盖，不设置则使用模板中的默认值) ----
+Quota:
+  CPU: "72"
+  Memory: 250Gi
+  GPU: "1"
+  Storage: 2T
+  Pods: "10"
+
+# ---- PVC (可选覆盖) ----
+PVC:
+  StorageClass: gpfs-csi-dynamic
+  Size: 500G
+
+# ---- 以下为原始 userchart 兼容字段 (adminchart 不使用) ----
 DeployName: test06-pytorch-ssh
 Label: pytorch
 ContainerName: pytorch
