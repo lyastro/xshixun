@@ -30,6 +30,12 @@
 {{ $use_egl := .Values.UseEGL | default false }}
 {{ $egl_image := .Values.EGLImage | default "harbor.xa.xshixun.com:7443/infra/nvidia-egl-libs:560.35.03" }}
 
+{{ $models_data_pvc := .Values.ModelsDataPVC | default (dict) }}
+{{ $use_models_data := $models_data_pvc.enabled | default false }}
+{{ $models_data_claim := $models_data_pvc.claimName | default (printf "pvc-models-data-%s" $namespace) }}
+{{ $models_data_mount := $models_data_pvc.mountPath | default "/data" }}
+{{ $models_data_ro := $models_data_pvc.readOnly | default false }}
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -132,6 +138,13 @@ spec:
           mountPath: /egl-libs
           readOnly: true
 {{- end }}
+{{ if $use_models_data }}
+        - name: models-data
+          mountPath: {{ $models_data_mount }}
+{{ if $models_data_ro }}
+          readOnly: true
+{{ end }}
+{{ end }}
       volumes:
 {{ if $use_shm }}
       - name: dshm
@@ -166,6 +179,11 @@ spec:
         emptyDir:
           sizeLimit: 200Mi
 {{- end }}
+{{ if $use_models_data }}
+      - name: models-data
+        persistentVolumeClaim:
+          claimName: {{ $models_data_claim }}
+{{ end }}
 
 ---
 apiVersion: v1

@@ -19,14 +19,14 @@ PVC:
   Size: 500G
 
 # ---- 以下为原始 userchart 兼容字段 (adminchart 不使用) ----
-DeployName: test06-pytorch-ssh
-Label: pytorch
-ContainerName: pytorch
-ContainerImage: harbor.xa.xshixun.com:7443/share/pytorch/pytorch:2.1.1-cuda12.1-cudnn8-runtime-ssh
-Limits:
-  CPU: 8
-  memory: 20Gi
-  GPU: 2
-NVMEStorage: 1T
-UID: 2005
-GID: 500
+# DeployName: test06-pytorch-ssh
+# Label: pytorch
+# ContainerName: pytorch
+# ContainerImage: harbor.xa.xshixun.com:7443/share/pytorch/pytorch:2.1.1-cuda12.1-cudnn8-runtime-ssh
+# Limits:
+#   CPU: 8
+#   memory: 20Gi
+#   GPU: 2
+# NVMEStorage: 1T
+# UID: 2005
+# GID: 500
