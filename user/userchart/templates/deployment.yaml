@@ -27,6 +27,15 @@
 
 {{ $replicas := .Values.Replicas | default 1 }}
 
+{{ $use_egl := .Values.UseEGL | default false }}
+{{ $egl_image := .Values.EGLImage | default "harbor.xa.xshixun.com:7443/infra/nvidia-egl-libs:560.35.03" }}
+
+{{ $models_data_pvc := .Values.ModelsDataPVC | default (dict) }}
+{{ $use_models_data := $models_data_pvc.enabled | default false }}
+{{ $models_data_claim := $models_data_pvc.claimName | default (printf "pvc-models-data-%s" $namespace) }}
+{{ $models_data_mount := $models_data_pvc.mountPath | default "/data" }}
+{{ $models_data_ro := $models_data_pvc.readOnly | default false }}
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -57,6 +66,16 @@ spec:
         runAsGroup: {{ $gid }}
       nodeSelector:
         gpu-model: {{ .Values.GPU }}
+{{- if $use_egl }}
+      initContainers:
+      - name: init-egl-libs
+        image: {{ $egl_image }}
+        imagePullPolicy: IfNotPresent
+        command: ["cp", "-a", "/egl-libs/.", "/target/"]
+        volumeMounts:
+        - name: egl-libs
+          mountPath: /target
+{{- end }}
       containers:
       - name: {{ $containername }}
         imagePullPolicy: IfNotPresent
@@ -72,6 +91,15 @@ spec:
 {{- else }}
         command: ["bash", "-c", "--"]
         args: ["while true; do sleep 30; done;"]
+{{- end }}
+{{- if $use_egl }}
+        env:
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: "compute,utility"
+        - name: __EGL_VENDOR_LIBRARY_DIRS
+          value: "/egl-libs/glvnd"
+        - name: LD_LIBRARY_PATH
+          value: "/egl-libs/lib"
 {{- end }}
         resources:
           limits:
@@ -105,6 +133,18 @@ spec:
         - name: dshm
           mountPath: /dev/shm
 {{ end }}
+{{- if $use_egl }}
+        - name: egl-libs
+          mountPath: /egl-libs
+          readOnly: true
+{{- end }}
+{{ if $use_models_data }}
+        - name: models-data
+          mountPath: {{ $models_data_mount }}
+{{ if $models_data_ro }}
+          readOnly: true
+{{ end }}
+{{ end }}
       volumes:
 {{ if $use_shm }}
       - name: dshm
@@ -132,6 +172,17 @@ spec:
         hostPath:
           path: /mnt/gpfs2/hqzy-mg3226/gpfs-share # directory location on host
           type: Directory # this field is optional
+{{ end }}
+
+{{- if $use_egl }}
+      - name: egl-libs
+        emptyDir:
+          sizeLimit: 200Mi
+{{- end }}
+{{ if $use_models_data }}
+      - name: models-data
+        persistentVolumeClaim:
+          claimName: {{ $models_data_claim }}
 {{ end }}
 
 ---

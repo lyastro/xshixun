@@ -5,9 +5,9 @@ metadata:
   name: pvc-gpfshome-{{ .Values.NameSpace }}
   namespace: {{ .Values.NameSpace }}
 spec:
-  storageClassName: gpfs-csi-dynamic
+  storageClassName: {{ default "gpfs-csi-dynamic" .Values.PVC.StorageClass }}
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: 500G  # 申请的资源大小
+      storage: {{ default "500G" .Values.PVC.Size }}
